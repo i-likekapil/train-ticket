@@ -1,0 +1,49 @@
+# HTTP Server
+server:
+  port: 12346  # HTTP (Tomcat) port
+#  port: 8080  # HTTP (Tomcat) port
+
+spring:
+  application:
+    name: ts-travel-service
+  data:
+    mongodb:
+      host: ts-travel-mongo
+#      host: localhost
+#      username: user
+#      password: ${MONGODB_PASSWORD}
+      database: ts
+      port: 27017
+swagger:
+  controllerPackage: travel.controller
+
+logging:
+  file: /var/log/ts-travel-application.logs
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      travelServiceCB :
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        failureRateThreshold: 60
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 1
+        slidingWindowSize: 5
+        waitDurationInOpenState: 60s
+        slidingWindowType: COUNT_BASED
+        slowCallDurationThreshold: 4s
+        slowCallRateThreshold: 60
+
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
